@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Quiz Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div id="startPage">
+      <h1>Welcome to the Quiz</h1>
+      <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div id="quizContainer" style="display: none;"></div>
+
+    <div id="scoreboard" style="display: none;"></div>
+
+    <button id="restartBtn" style="display: none;" onclick="startQuiz()">Restart Quiz</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

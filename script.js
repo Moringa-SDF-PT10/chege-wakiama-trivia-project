@@ -1,94 +1,114 @@
+let questions = [];
+let userScore = 0;
+let userAnswers = [];
+
 const quizContainer = document.getElementById('quizContainer');
-const scoreboard = document.getElementById('scoreboard');
-const restartBtn = document.getElementById('restartBtn');
+const scoreBoard = document.getElementById('scoreboard');
+const restartButton = document.getElementById('restartBtn');
 const startPage = document.getElementById('startPage');
 
-let questions = [];
-let currentQuestionIndex = 0;
-let score = 0;
-let wrongAnswers = [];
-
 function decodeHTML(html) {
-  const txt = document.createElement('textarea');
-  txt.innerHTML = html;
-  return txt.value;
+  const textArea = document.createElement("textarea");
+  textArea.innerHTML = html;
+  return textArea.value;
 }
 
 function startQuiz() {
   startPage.style.display = 'none';
-  scoreboard.style.display = 'none';
-  restartBtn.style.display = 'none';
   quizContainer.style.display = 'block';
-  quizContainer.innerHTML = 'Loading questions...';
-
-  fetch('https://opentdb.com/api.php?amount=10')
-    .then(res => res.json())
+  scoreBoard.style.display = 'none';
+  restartButton.style.display = 'none';
+  quizContainer.innerHTML = '<p>Loading questions...</p>';
+  userScore = 0;
+  userAnswers = [];
+  fetch("https://opentdb.com/api.php?amount=10")
+    .then(response => response.json())
     .then(data => {
       questions = data.results;
-      currentQuestionIndex = 0;
-      score = 0;
-      wrongAnswers = [];
-      showQuestion();
+      showAllQuestions();
     });
 }
 
-function showQuestion() {
-  const q = questions[currentQuestionIndex];
-  const answers = [...q.incorrect_answers, q.correct_answer].sort(() => Math.random() - 0.5);
-  quizContainer.innerHTML = `
-    <div class="question">
-      <h3>Question ${currentQuestionIndex + 1}:</h3>
-      <p>${decodeHTML(q.question)}</p>
-    </div>
-    <div class="answers">
-      ${answers.map(ans => `<button onclick="checkAnswer(this, '${encodeURIComponent(q.correct_answer)}', '${encodeURIComponent(ans)}')">${decodeHTML(ans)}</button>`).join('')}
-    </div>
-    <div id="feedback" class="feedback"></div>
-  `;
-}
+function showAllQuestions() {
+  quizContainer.innerHTML = '';
+  questions.forEach((questionItem, questionIndex) => {
+    const allAnswers = [...questionItem.incorrect_answers, questionItem.correct_answer]
+      .sort();
 
-function checkAnswer(btn, correct, selected) {
-  const feedback = document.getElementById('feedback');
-  correct = decodeURIComponent(correct);
-  selected = decodeURIComponent(selected);
+    const questionBlock = document.createElement('div');
+    questionBlock.className = 'question-block';
 
-  const isCorrect = correct === selected;
-  feedback.textContent = isCorrect ? 'Correct!' : `Wrong! Correct answer: ${decodeHTML(correct)}`;
+    questionBlock.innerHTML = `
+      <div class="question">
+        <h3>Question ${questionIndex + 1}:</h3>
+        <p>${decodeHTML(questionItem.question)}</p>
+      </div>
+      <div class="answers" id="answers-${questionIndex}">
+        ${allAnswers.map(answerOption => `
+          <button onclick="checkAnswer(this, '${encodeURIComponent(questionItem.correct_answer)}', '${encodeURIComponent(answerOption)}', ${questionIndex})">
+            ${decodeHTML(answerOption)}
+          </button>
+        `).join('')}
+      </div>
+      <div id="feedback-${questionIndex}" class="feedback"></div>
+    `;
 
-  if (isCorrect) score++;
-  else wrongAnswers.push({
-    question: decodeHTML(questions[currentQuestionIndex].question),
-    correct: decodeHTML(correct)
+    quizContainer.appendChild(questionBlock);
   });
 
-  const buttons = document.querySelectorAll('.answers button');
-  buttons.forEach(b => b.disabled = true);
+  const submitButton = document.createElement('button');
+  submitButton.textContent = 'Submit Quiz';
+  submitButton.onclick = endQuiz;
+  quizContainer.appendChild(submitButton);
+}
 
-  setTimeout(() => {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-      showQuestion();
-    } else {
-      endQuiz();
-    }
-  }, 1500);
+function checkAnswer(selectedButton, correctAnswerEncoded, selectedAnswerEncoded, questionIndex) {
+  const correctAnswer = decodeURIComponent(correctAnswerEncoded);
+  const selectedAnswer = decodeURIComponent(selectedAnswerEncoded);
+
+  const allAnswerButtons = document.querySelectorAll(`#answers-${questionIndex} button`);
+  allAnswerButtons.forEach(button => {
+    button.disabled = true;
+  });
+
+  selectedButton.classList.add('selected');
+
+  const feedbackElement = document.getElementById(`feedback-${questionIndex}`);
+  if (selectedAnswer === correctAnswer) {
+    feedbackElement.textContent = 'Correct!';
+    feedbackElement.style.color = 'green';
+    userScore++;
+  } else {
+    feedbackElement.textContent = `Wrong! Correct answer: ${decodeHTML(correctAnswer)}`;
+    feedbackElement.style.color = 'red';
+  }
+
+  userAnswers[questionIndex] = {
+    correctAnswer: correctAnswer,
+    selectedAnswer: selectedAnswer
+  };
 }
 
 function endQuiz() {
   quizContainer.style.display = 'none';
-  restartBtn.style.display = 'block';
-  scoreboard.style.display = 'block';
+  scoreBoard.style.display = 'block';
+  restartButton.style.display = 'inline-block';
 
-  let result = `<h2>Quiz Completed</h2><p>Your score: ${score} / ${questions.length}</p>`;
-  if (wrongAnswers.length > 0) {
-    result += '<h3>Correct Answers to Questions You Missed:</h3><ul>';
-    wrongAnswers.forEach(w => {
-      result += `<li><strong>${w.question}</strong><br>Correct Answer: ${w.correct}</li>`;
-    });
-    result += '</ul>';
-  } else {
-    result += '<p>You got all questions correct. Well done!</p>';
-  }
+  scoreBoard.innerHTML = `<h2>Your Score: ${userScore}/${questions.length}</h2>`;
 
-  scoreboard.innerHTML = result;
+  const missedQuestions = questions.map((questionItem, index) => {
+    const userAnswerData = userAnswers[index];
+    if (!userAnswerData || userAnswerData.selectedAnswer !== userAnswerData.correctAnswer) {
+      return `
+        <div class="question-block">
+          <p><strong>Question ${index + 1}:</strong> ${decodeHTML(questionItem.question)}</p>
+          <p><strong>Correct Answer:</strong> ${decodeHTML(questionItem.correct_answer)}</p>
+        </div>
+      `;
+    } else {
+      return '';
+    }
+  }).join('');
+
+  scoreBoard.innerHTML += missedQuestions;
 }

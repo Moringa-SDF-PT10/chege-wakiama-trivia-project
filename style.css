@@ -1,49 +1,101 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  margin: 0;
-  padding: 20px;
+/* Center the start page vertically and horizontally */
+#startPage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #e6f7ff; /* Light blue background */
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  background: #fff;
+/* Style for the quiz container and center it */
+#quizContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
   padding: 20px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Each question block with a border */
+.question-block {
+  border: 1px solid #ccc;
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 15px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  width: 90%;
+  max-width: 600px;
 }
 
-.question {
-  margin-bottom: 10px;
-}
-
-.answers button {
-  display: block;
-  margin: 5px 0;
-  padding: 10px;
+/* Vertical arrangement for answers */
+.answers {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  background: #eee;
-  border: none;
-  cursor: pointer;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Style for each answer button */
+.answers button {
+  width: 100%;
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
   border-radius: 5px;
+  background-color: white;
+  margin-bottom: 5px;
+  transition: all 0.2s ease;
 }
 
+/* Hover effect on answer buttons */
 .answers button:hover {
-  background: #ddd;
+  background-color: lightblue;
+  cursor: pointer;
 }
 
-.feedback {
-  margin-top: 5px;
+/* Highlight selected answer - enhanced to be more visible */
+.selected {
+  background-color: lightblue !important;
+  border: 2px solid #0078d7 !important;
   font-weight: bold;
 }
 
-#scoreboard {
-  margin-top: 20px;
+/* Keep selected highlight even when button is disabled */
+.answers button[disabled].selected {
+  opacity: 1;
+  background-color: lightblue !important;
+  color: #333;
 }
 
-#restartBtn {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
+/* Make sure disabled buttons are still readable */
+.answers button[disabled] {
+  opacity: 0.8;
+  cursor: default;
 }
+
+/* Feedback text under each question */
+.feedback {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+/* Scoreboard styles - centered horizontally */
+#scoreboard {
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Blue colored score text *
